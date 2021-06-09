@@ -73,9 +73,9 @@ if _IS_MONKEYTYPE_INSTALLED:
                     if inspect.getmodule(_type) == typing:
                         _type_to_string = str(_type)
                         _all_type += _type_to_string.replace('typing.', '') + ','
-                    elif inspect.getmodule(_type) == torch.nn.parameter:
-                        # If the type is a torch.nn.parameter module,
-                        # concatenate the module name and type name.
+                    elif "torch.nn.parameter.Parameter" in str(_type):
+                        # If the type is a torch.nn.parameter.Parameter,use
+                        # the module name and type name.
                         _all_type += _type.__module__ + '.' + _type.__name__ + ','
                     else:
                         _all_type += _type.__name__ + ','

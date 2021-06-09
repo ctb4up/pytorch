@@ -141,7 +141,8 @@ class Vectorized<double> {
         vec_sel(a._vec0, b._vec0, mask._vecb0),
         vec_sel(a._vec1, b._vec1, mask._vecb1)};
   }
-  static Vectorized<double> arange(double base = 0., double step = 1.) {
+  template <typename step_t>
+  static Vectorized<double> arange(double base = 0., step_t step = static_cast<step_t>(1)) {
     return Vectorized<double>(base, base + step, base + 2 * step, base + 3 * step);
   }
 
@@ -253,7 +254,9 @@ class Vectorized<double> {
   }
 
   Vectorized<double> angle() const {
-    return Vectorized<double>{0};
+    auto tmp = blendv(
+      Vectorized<double>(0), Vectorized<double>(c10::pi<double>), *this < Vectorized<double>(0));
+    return blendv(tmp, *this, isnan());
   }
   Vectorized<double> real() const {
     return *this;
@@ -385,8 +388,8 @@ class Vectorized<double> {
   DEFINE_MEMBER_OP(operator-, double, vec_sub)
   DEFINE_MEMBER_OP(operator*, double, vec_mul)
   DEFINE_MEMBER_OP(operator/, double, vec_div)
-  DEFINE_MEMBER_OP(maximum, double, vec_max)
-  DEFINE_MEMBER_OP(minimum, double, vec_min)
+  DEFINE_MEMBER_OP(maximum, double, vec_max_nan2)
+  DEFINE_MEMBER_OP(minimum, double, vec_min_nan2)
   DEFINE_MEMBER_OP(operator&, double, vec_and)
   DEFINE_MEMBER_OP(operator|, double, vec_or)
   DEFINE_MEMBER_OP(operator^, double, vec_xor)

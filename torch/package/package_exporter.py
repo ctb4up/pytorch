@@ -57,10 +57,13 @@ class PackagingErrorReason(Enum):
     This enum is used to provide good error messages when
     :class:`PackagingError` is raised.
     """
-    def __repr__(self):
-        return '<%s.%s>' % (self.__class__.__name__, self.name)
 
-    IS_EXTENSION_MODULE = "Module is a C extension module. torch.package supports Python modules only."
+    def __repr__(self):
+        return "<%s.%s>" % (self.__class__.__name__, self.name)
+
+    IS_EXTENSION_MODULE = (
+        "Module is a C extension module. torch.package supports Python modules only."
+    )
     NO_DUNDER_FILE = "Module had no __file__ defined."
     SOURCE_FILE_NOT_FOUND = (
         "Module had a __file__, but we could not find it in your filesystem."
@@ -611,7 +614,21 @@ node [shape=box];
         exclude: "GlobPattern" = (),
         allow_empty: bool = True,
     ):
-        """TODO DOC"""
+        """Specify modules that should be packaged. A module must match some ``intern`` pattern in order to be
+        included in the package and have its dependencies processed recursively.
+
+        Args:
+            include (Union[List[str], str]): A string e.g. "my_package.my_subpackage", or list of strings
+                for the names of the modules to be externed. This can also be a glob-style pattern, as described in :meth:`mock`.
+
+            exclude (Union[List[str], str]): An optional pattern that excludes some patterns that match the include string.
+
+            allow_empty (bool): An optional flag that specifies whether the intern modules specified by this call
+                to the ``intern`` method must be matched to some module during packaging. If an ``intern`` module glob
+                pattern is added with ``allow_empty=False``, and ``close`` is called (either explicitly or via ``__exit__``)
+                before any modules match that pattern, an exception is thrown. If ``allow_empty=True``, no such exception is thrown.
+
+        """
         self.patterns[GlobGroup(include, exclude=exclude)] = _PatternInfo(
             _ModuleProviderAction.INTERN, allow_empty
         )
@@ -722,7 +739,11 @@ node [shape=box];
                     "`torch.package.package_exporter._gate_torchscript_serialization` to `False`."
                 )
             if self.serialized_reduces.get(id(obj)) is None:
-                self.serialized_reduces[id(obj)] = ("reduce_package", id(obj), *obj.__reduce_package__(self))
+                self.serialized_reduces[id(obj)] = (
+                    "reduce_package",
+                    id(obj),
+                    *obj.__reduce_package__(self),
+                )
 
             return self.serialized_reduces[id(obj)]
 

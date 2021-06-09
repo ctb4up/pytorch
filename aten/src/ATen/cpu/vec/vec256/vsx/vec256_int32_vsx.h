@@ -154,7 +154,8 @@ class Vectorized<int32_t> {
         vec_sel(a._vec1, b._vec1, mask._vecb1)};
   }
 
-  static Vectorized<int32_t> arange(int32_t base = 0.f, int32_t step = 1.f) {
+  template <typename step_t>
+  static Vectorized<int32_t> arange(int32_t base = 0.f, step_t step = static_cast<step_t>(1)) {
     return Vectorized<int32_t>(
         base,
         base + step,
@@ -219,7 +220,8 @@ class Vectorized<int32_t> {
   int32_t& operator[](int idx) = delete;
 
   Vectorized<int32_t> angle() const {
-    return Vectorized<int32_t>{0};
+    return blendv(
+      Vectorized<int32_t>(0), Vectorized<int32_t>(c10::pi<int32_t>), *this < Vectorized<int32_t>(0));
   }
   Vectorized<int32_t> real() const {
     return *this;
